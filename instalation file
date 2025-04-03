@@ -1,0 +1,1 @@
+npm i express express-actuator handlebars  jsonwebtoken morgan multer nodemailer nodemon pg sequelize  @aws-sdk/client-s3 @aws-sdk/lib-storage @aws-sdk/s3-request-presigner aws-sdk bcrypt cookie-parser cors crypto dotenv http-errors
