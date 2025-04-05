@@ -9,11 +9,11 @@ const userAdmin = (req, res, next) => {
         const token = req.headers["authorization"].split(" ")[1];
         const payload = jwt.verify(token, SECRET_KEY);
         let roles = [
-            1000, 2000
+            1000, 2000, 5000
         ]
         if (roles.includes(payload.role_id)) {
             const decode = jwt.decode(token);
-            console.log("decode", decode)
+            // console.log("decode", decode)
             req.user = decode;
             next();
         } else if (payload.role_id === 4000) {

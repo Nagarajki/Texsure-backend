@@ -50,7 +50,7 @@ const addLogo = async ( fileData,folderName ) => {
             Key: `${folderStructure}`,
             Body: fileData.buffer, // Using fileData.buffer instead of fs.readFile
         };
-        console.log("bucketParams==>>>", bucketParams);
+        // console.log("bucketParams==>>>", bucketParams);
         const parallelUploads3 = new Upload({
             client: s3Client,
             queueSize:1,
@@ -74,7 +74,7 @@ const addLogo = async ( fileData,folderName ) => {
 //View the image
 const awsLogoAcces = async (img_path, folderName) => {
     let keyPath ;
-    console.log("keyPath", img_path)
+    // console.log("keyPath", img_path)
     if (folderName === 'COMPANY') {
         keyPath = `companyLogo/${img_path}`;
     } else if (folderName === 'PLANT') {
@@ -128,7 +128,7 @@ const updateLogo = async (old_path, new_path, folderName) => {
             url: response.Location,
             Key: new_path.originalname,
         };
-        console.log("bucketParams", datafile);
+        // console.log("bucketParams", datafile);
         return datafile;
     } catch (error) {
         console.error("Error in updateAwsBanners:", error);

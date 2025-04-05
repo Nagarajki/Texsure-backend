@@ -83,7 +83,7 @@ const sendEmailToken = async (
 
     try {
         const data = await transporter.sendMail(mailOptions);
-        console.log("data", data)
+        // console.log("data", data)
         return "Email sent successfully";
     } catch (error) {
         console.log(error)

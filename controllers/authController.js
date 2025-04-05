@@ -86,12 +86,12 @@ const signIn = async (req, res, next) => {
         const otp = req.body.otp.toString(); // Convert OTP to string
 
         // Add debug logging
-        console.log('Attempting login with:', { email_id, otp });
+        //console.log('Attempting login with:', { email_id, otp });
 
         let user = await userModel.findOne({ where: { email_id, otp } });
 
         // Debug log the found user
-        console.log('Found user:', user);
+        // console.log('Found user:', user);
 
         if (user) {
             const { id, first_name, last_name, email_id, company_id, role_id, is_active } = user;
