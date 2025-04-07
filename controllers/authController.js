@@ -104,9 +104,10 @@ const signIn = async (req, res, next) => {
             const token = jwt.sign(payload, secretKey, {
                 // expiresIn: "30d"
             });
-            // user.otp = null;
-            // await user.save();
-            const encryptResponse =await encrypt(token)
+            console.log("token", token)
+            user.otp = null;
+            await user.save();
+            const encryptResponse = await encrypt(token)
             res.status(200).json({
                 data: encryptResponse,
             });

@@ -1,22 +1,29 @@
-const UserModel = require("../models/userModel");
-const bcrypt = require('bcrypt');
-const { encrypt } = require("../utils/encrypt");
 const roles = require("../models/rolesModel");
+const { encrypt } = require("../utils/encrypt");
+const userModel = require('../models/userModel');
 
 const getUsers = async (req, res, next) => {
     try {
         const { id, role_id, company_id: cId } = req.user;
         let userResponse;
         if (role_id === 1000) {
-            userResponse = await UserModel.findAll({
+            userResponse = await userModel.findAll({
                 where: { is_deleted: false }, include: [{
                     model: roles,
                     attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
                 }]
             });
         } else if (role_id === 2000) {
-            userResponse = await UserModel.findAll({
+            userResponse = await userModel.findAll({
                 where: { company_id: cId, is_deleted: false },
+                include: [{
+                    model: roles,
+                    attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
+                }]
+            });
+        } else if (role_id === 5000) {
+            userResponse = await userModel.findAll({
+                where: { id, is_deleted: false },
                 include: [{
                     model: roles,
                     attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
@@ -27,7 +34,7 @@ const getUsers = async (req, res, next) => {
         res.status(200).json({
             error: false,
             message: "Users fetched successfully",
-            data: userResponse
+            data: encryptData
         })
     } catch (error) {
         console.log(error);
@@ -40,7 +47,7 @@ const getUserById = async (req, res, next) => {
         let encryptData;
         let users;
         if (role_id === 1000) {
-            users = await UserModel.findOne({
+            users = await userModel.findOne({
                 where: {
                     id: id, is_deleted: false
                 },
@@ -51,7 +58,7 @@ const getUserById = async (req, res, next) => {
             });
             encryptData = await encrypt(users)
         } else if (user_id * 1 === id * 1) {
-            users = await UserModel.findOne({
+            users = await userModel.findOne({
                 where: {
                     id: user_id
                 }
@@ -67,7 +74,7 @@ const getUserById = async (req, res, next) => {
         return res.status(200).json({
             error: false,
             message: "Users fetched successfully",
-            data: users
+            data: encryptData
         })
     } catch (error) {
         console.log(error);
@@ -76,38 +83,32 @@ const getUserById = async (req, res, next) => {
 
 const updateUser = async (req, res) => {
     try {
-        let { name: user_name, role_id: u_role } = req.user;
-        let { id, name, email, phone, password, company_id, sites_id, role_id, is_active } = req.body;
-        email = email.toLowerCase();
+        let { first_name: user_name, role_id: u_role } = req.user;
+        let { id, first_name, last_name, email_id, company_id, role_id, is_active } = req.body;
+        if (email_id) email_id = email_id.toLowerCase();
 
-        const user = await UserModel.findOne({ where: { id, is_deleted: false } });
+        const user = await userModel.findOne({ where: { id, is_deleted: false } });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+        if (user?.email_id !== email_id) {
+            const existUser = await userModel.findOne({ where: { email_id, is_deleted: false } });
+            if (existUser) {
+                return res.status(404).json({ message: "Emial already Used" });
+            }
+        }
 
         let useData = {
-            name, email, phone, password, company_id, sites_id, role_id, is_active, updated_at: new Date(), updated_by: user_name
-        }
-        if (u_role === 1000) {
-            useData.email = email;
-            useData.phone = phone;
-        } else {
-            useData.email = user?.email;
+            first_name, last_name, email_id, company_id, role_id, is_active, updated_at: new Date(), updated_by: user_name
         }
 
-        // Encrypt password
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            useData.password = await bcrypt.hash(password, salt);
-        }
-
-        const updatedUser = await UserModel.update(
+        const updatedUser = await userModel.update(
             useData,
             { where: { id } }
         );
 
-        // const updatedUser = await UserModel.findOne({ where: { id } });
+        // const updatedUser = await userModel.findOne({ where: { id } });
 
         res.status(200).json({
             error: false,
@@ -123,12 +124,12 @@ const updateUser = async (req, res) => {
 let deleteUser = async (req, res, next) => {
     try {
         let { user_id } = req.query;
-        const user = await UserModel.findOne({ where: { id: user_id, is_deleted: false } });
+        const user = await userModel.findOne({ where: { id: user_id, is_deleted: false } });
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        const destroyUser = await UserModel.destroy(
+        const destroyUser = await userModel.destroy(
             { where: { id: user_id } }
         );
         res.status(201).json({

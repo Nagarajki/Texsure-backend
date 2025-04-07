@@ -2,17 +2,20 @@ const { Sequelize } = require('sequelize');
 const sequelize = require('../config/db');
 const userModel = require('./userModel');
 
-
-const roles = sequelize.define("roles", {
-    role_id: {
+const companyModel = sequelize.define("company", {
+    company_id: {
         type: Sequelize.INTEGER,
         autoIncrement: false,
         allowNull: false,
         primaryKey: true,
     },
-    name: {
+    company_name: {
         type: Sequelize.STRING,
         allowNull: false,
+    },
+    city: {
+        type: Sequelize.STRING,
+        allowNull: true,
     },
     created_at: {
         type: Sequelize.DATE,
@@ -45,11 +48,11 @@ const roles = sequelize.define("roles", {
     }
 },
     {
-        tableName: "roles",
+        tableName: "company",
         timestamps: false,
     });
 
-roles.hasMany(userModel, { foreignKey: "role_id" });
-userModel.belongsTo(roles, { foreignKey: "role_id" });
+companyModel.hasMany(userModel, { foreignKey: "company_id" });
+userModel.belongsTo(companyModel, { foreignKey: "company_id" });
 
-module.exports = roles;
+module.exports = companyModel;
