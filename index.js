@@ -10,8 +10,8 @@ require('./config/db')
 const PORT = process.env.PORT || 9000;
 
 //route file importing
-
 const userRoute = require('./routes/userRoute');
+const companyRoute = require('./routes/companyRoute');
 
 const taxSureRouters = express.Router();
 
@@ -26,6 +26,7 @@ app.use('/taxsure', taxSureRouters);
 
 //middlewares
 taxSureRouters.use('/auth', userRoute)
+taxSureRouters.use('/company', companyRoute)
 
 
 app.get("/", (req, res, next) => {

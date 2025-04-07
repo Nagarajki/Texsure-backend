@@ -2,6 +2,40 @@ const roles = require("../models/rolesModel");
 const { encrypt } = require("../utils/encrypt");
 const companyModel = require('../models/companyModel');
 
+
+const createCompany = async (req, res, next) => {
+    try {
+        let { first_name: user_name } = req.user;
+        let { company_name, city } = req.body;
+        const isUserExists = await companyModel.findOne({ where: { company_name } });
+        if (isUserExists) {
+            res.status(409).json({
+                error: true,
+                message: "Company name already used..",
+                data: null,
+            });
+        } else {
+            await sequelize.transaction(async (transaction) => {
+                let userResponse = await companyModel.create(
+                    {
+                        company_name, city, created_by: user_name
+                    },
+                    { transaction }
+                );
+
+                res.status(200).json({
+                    error: false,
+                    message: "Comapny created Successfully",
+                    data: userResponse,
+                });
+            });
+        }
+    } catch (err) {
+        console.log("error", err);
+        next(err)
+    }
+};
+
 const getCompanies = async (req, res, next) => {
     try {
         const { role_id, company_id } = req.user;
@@ -12,7 +46,7 @@ const getCompanies = async (req, res, next) => {
             });
         } else {
             companyResponse = await companyModel.findAll({
-                where: { company_id, is_deleted: false }
+                where: { id: company_id, is_deleted: false }
             });
         }
         const encryptData = await encrypt(companyResponse)
@@ -35,18 +69,14 @@ const getCompanyById = async (req, res, next) => {
         if (role_id === 1000) {
             comapny = await companyModel.findOne({
                 where: {
-                    company_id: id, is_deleted: false
-                },
-                include: [{
-                    model: roles,
-                    attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
-                }]
+                    is_deleted: false
+                }
             });
             encryptData = await encrypt(comapny)
         } else if (cId * 1 === id * 1) {
             comapny = await companyModel.findOne({
                 where: {
-                    company_id: id
+                    id
                 }
             });
             encryptData = await encrypt(comapny)
@@ -71,9 +101,9 @@ const getCompanyById = async (req, res, next) => {
 const updateCompany = async (req, res, next) => {
     try {
         let { first_name: user_name } = req.user;
-        let { company_id, company_name, city, is_active } = req.body;
+        let { id, company_name, city, is_active } = req.body;
 
-        const company = await companyModel.findOne({ where: { company_id, is_deleted: false } });
+        const company = await companyModel.findOne({ where: { id, is_deleted: false } });
 
         if (!company) {
             return res.status(404).json({ message: "Company not found" });
@@ -90,7 +120,7 @@ const updateCompany = async (req, res, next) => {
 
         const updatedCompany = await companyModel.update(
             useData,
-            { where: { company_id } }
+            { where: { id } }
         );
 
         res.status(200).json({
@@ -106,19 +136,19 @@ const updateCompany = async (req, res, next) => {
 
 let deleteCompany = async (req, res, next) => {
     try {
-        let { user_id } = req.query;
-        const user = await companyModel.findOne({ where: { id: user_id, is_deleted: false } });
+        let { company_id } = req.query;
+        const company = await companyModel.findOne({ where: { id: company_id, is_deleted: false } });
 
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+        if (!company) {
+            return res.status(404).json({ message: "Company not found" });
         }
-        const destroyUser = await companyModel.destroy(
-            { where: { id: user_id } }
+        const destroyCompany = await companyModel.destroy(
+            { where: { id: company_id } }
         );
         res.status(201).json({
             error: false,
-            message: "User deleted",
-            data: destroyUser
+            message: "Company deleted",
+            data: destroyCompany
         })
     } catch (error) {
 
@@ -126,6 +156,7 @@ let deleteCompany = async (req, res, next) => {
 }
 
 module.exports = {
+    createCompany,
     getCompanies,
     getCompanyById,
     updateCompany,

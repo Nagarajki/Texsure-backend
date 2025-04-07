@@ -1,6 +1,7 @@
 const roles = require("../models/rolesModel");
 const { encrypt } = require("../utils/encrypt");
 const userModel = require('../models/userModel');
+const companyModel = require("../models/companyModel");
 
 const getUsers = async (req, res, next) => {
     try {
@@ -11,7 +12,7 @@ const getUsers = async (req, res, next) => {
                 where: { is_deleted: false }, include: [{
                     model: roles,
                     attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
-                }]
+                }, { model: companyModel }]
             });
         } else if (role_id === 2000) {
             userResponse = await userModel.findAll({
@@ -19,7 +20,7 @@ const getUsers = async (req, res, next) => {
                 include: [{
                     model: roles,
                     attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
-                }]
+                }, { model: companyModel }]
             });
         } else if (role_id === 5000) {
             userResponse = await userModel.findAll({
@@ -27,7 +28,7 @@ const getUsers = async (req, res, next) => {
                 include: [{
                     model: roles,
                     attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
-                }]
+                }, { model: companyModel }]
             });
         }
         const encryptData = await encrypt(userResponse)
@@ -54,14 +55,17 @@ const getUserById = async (req, res, next) => {
                 include: [{
                     model: roles,
                     attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
-                }]
+                }, { model: companyModel }]
             });
             encryptData = await encrypt(users)
         } else if (user_id * 1 === id * 1) {
             users = await userModel.findOne({
                 where: {
                     id: user_id
-                }
+                }, include: [{
+                    model: roles,
+                    attributes: ['role_id', 'name'], // Only include 'role_id' and 'name' fields
+                }, { model: companyModel }]
             });
             encryptData = await encrypt(users)
         } else {

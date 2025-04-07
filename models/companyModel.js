@@ -3,11 +3,11 @@ const sequelize = require('../config/db');
 const userModel = require('./userModel');
 
 const companyModel = sequelize.define("company", {
-    company_id: {
+    id: {
         type: Sequelize.INTEGER,
-        autoIncrement: false,
         allowNull: false,
         primaryKey: true,
+        autoIncrement: true,
     },
     company_name: {
         type: Sequelize.STRING,
